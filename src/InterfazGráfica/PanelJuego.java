@@ -4,6 +4,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
+/**
+ * La clase PanelJuego se encarga de la configuración y la lógica del juego.
+ * Hereda de JPanel e implementa Runnable para manejar el ciclo de juego.
+ */
 public class PanelJuego extends JPanel implements Runnable {
 
     // Configuración de pantalla
@@ -33,7 +37,10 @@ public class PanelJuego extends JPanel implements Runnable {
     public Jugador jugador = new Jugador(this, manejadorTeclas); // Instanciar jugador
     public ArrayList<ObjetoJuego> objetos = new ArrayList<>(); // ArrayList para objetos de juego
 
-    // Constructor del panel del juego
+    /**
+     * Constructor de la clase PanelJuego.
+     * Inicializa la configuración de la pantalla y del juego.
+     */
     public PanelJuego() {
         this.setPreferredSize(new Dimension(anchoPantalla, altoPantalla)); // Tamaño de la ventana
         this.setBackground(Color.BLACK); // Color de fondo
@@ -42,15 +49,25 @@ public class PanelJuego extends JPanel implements Runnable {
         this.setFocusable(true); // Permitir que la ventana tenga el foco de la aplicación
     }
 
+    /**
+     * Configura el juego cargando los objetos desde un archivo de texto.
+     */
     public void configurarJuego() {
         gestorActivos.cargarObjetos("/maps/objects01.txt");
     }
 
+    /**
+     * Inicia el hilo del juego.
+     */
     public void iniciarHiloJuego() {
         hiloJuego = new Thread(this); // 'this' pasa PanelJuego al hiloJuego
         hiloJuego.start(); // Iniciar hilo del juego llamando al método run
     }
 
+    /**
+     * Método run del hilo del juego.
+     * Controla el ciclo de juego y actualiza la pantalla.
+     */
     @Override
     public void run() {
         double intervaloDibujo = 1000000000 / FPS; // 1 segundo
@@ -73,10 +90,17 @@ public class PanelJuego extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Actualiza el estado del jugador.
+     */
     public void actualizar() {
         jugador.actualizar();
     }
 
+    /**
+     * Dibuja los componentes del juego en la pantalla.
+     * @param g Objeto Graphics para dibujar en la pantalla.
+     */
     public void paintComponent(Graphics g) {
         // Dibujar pantalla
         super.paintComponent(g); // Llamar al método paintComponent de JPanel

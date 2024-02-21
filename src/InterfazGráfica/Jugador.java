@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * La clase Jugador extiende a la clase Entidad y se encarga de gestionar las acciones del jugador en el juego.
+ */
 public class Jugador extends Entidad {
 
     PanelJuego pj;
@@ -13,6 +16,11 @@ public class Jugador extends Entidad {
     public final int pantallaX;
     public final int pantallaY;
 
+    /**
+     * Constructor de la clase Jugador.
+     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     * @param mt Instancia de ManejadorTeclas para gestionar las entradas del teclado.
+     */
     public Jugador(PanelJuego pj, ManejadorTeclas mt) {
         this.pj = pj;
         this.mt = mt;
@@ -32,6 +40,9 @@ public class Jugador extends Entidad {
         obtenerImagenJugador();
     }
 
+    /**
+     * Establece los valores predeterminados para el jugador.
+     */
     public void establecerValoresPredeterminados() {
         mundoX = pj.tamañoTile * 8;
         mundoY = pj.tamañoTile * 12;
@@ -39,6 +50,9 @@ public class Jugador extends Entidad {
         direccion = "abajo"; // Dirección inicial del jugador (arriba)
     }
 
+    /**
+     * Obtiene las imágenes del jugador a partir de archivos.
+     */
     public void obtenerImagenJugador() {
         try {
             arriba1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png"));
@@ -55,9 +69,14 @@ public class Jugador extends Entidad {
         }
     }
 
+    /**
+     * Actualiza el estado del jugador basado en las entradas del teclado y las colisiones.
+     */
     public void actualizar() {
+        // Comprobar si alguna tecla está presionada
         if (mt.arribaPresionado == true || mt.abajoPresionado == true || mt.izquierdaPresionado == true || mt.derechaPresionado == true) {
 
+            // Cambiar la dirección del jugador en función de la tecla presionada
             if (mt.arribaPresionado == true) {
                 direccion = "arriba";
             } else if (mt.abajoPresionado == true) {
@@ -72,6 +91,7 @@ public class Jugador extends Entidad {
         colisionActivada = false;
         pj.comprobadorColisiones.comprobarTile(this);
 
+        // Mover al jugador si no hay colisión
         if (colisionActivada == false) {
             switch (direccion) {
                 case "arriba":
@@ -88,6 +108,7 @@ public class Jugador extends Entidad {
                     break;
             }
 
+            // Cambiar el sprite del jugador para la animación
             contadorSprite++;
             if (contadorSprite > 12) {
                 if (numSprite == 1) {
@@ -100,8 +121,13 @@ public class Jugador extends Entidad {
         }
     }
 
+    /**
+     * Dibuja al jugador en el panel del juego.
+     * @param g2 Instancia de Graphics2D para dibujar al jugador.
+     */
     public void dibujar(Graphics2D g2) {
         BufferedImage imagen = null;
+        // Seleccionar la imagen del jugador en función de la dirección y el sprite actual
         switch (direccion) {
             case "arriba":
                 if (numSprite == 1) imagen = arriba1;
@@ -120,6 +146,7 @@ public class Jugador extends Entidad {
                 if (numSprite == 2) imagen = derecha2;
                 break;
         }
+        // Dibujar la imagen seleccionada en la posición del jugador en la pantalla
         g2.drawImage(imagen, pantallaX, pantallaY, pj.tamañoTile, pj.tamañoTile, null);
     }
 }

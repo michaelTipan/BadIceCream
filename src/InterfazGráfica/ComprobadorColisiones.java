@@ -1,13 +1,24 @@
 package InterfazGráfica;
 
+/**
+ * La clase ComprobadorColisiones se encarga de verificar las colisiones en el juego.
+ */
 public class ComprobadorColisiones {
 
-    PanelJuego pj;
+    PanelJuego pj; // Instancia de PanelJuego para acceder a las propiedades del juego.
 
+    /**
+     * Constructor de la clase ComprobadorColisiones.
+     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     */
     public ComprobadorColisiones(PanelJuego pj) {
         this.pj = pj;
     }
 
+    /**
+     * Comprueba si una entidad está colisionando con un tile.
+     * @param entidad La entidad que se va a comprobar.
+     */
     public void comprobarTile(Entidad entidad) {
 
         int entidadIzquierdaMundoX = entidad.mundoX + entidad.areaSolida.x;
@@ -22,6 +33,7 @@ public class ComprobadorColisiones {
 
         int numeroTile1, numeroTile2;
 
+        // Comprobar la colisión en función de la dirección de la entidad
         switch (entidad.direccion) {
             case "arriba":
                 filaArribaEntidad = (entidadArribaMundoY - entidad.velocidad) / pj.tamañoTile;
@@ -58,6 +70,12 @@ public class ComprobadorColisiones {
         }
     }
 
+    /**
+     * Comprueba si una entidad está colisionando con un objeto.
+     * @param entidad La entidad que se va a comprobar.
+     * @param jugador Indica si la entidad es el jugador.
+     * @return El índice del objeto con el que la entidad está colisionando, o 999 si no hay colisión.
+     */
     public int checkObjeto(Entidad entidad, boolean jugador) {
 
         int index = 999;
