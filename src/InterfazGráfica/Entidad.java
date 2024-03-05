@@ -1,31 +1,57 @@
 package InterfazGráfica;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
- * La clase Entidad representa una entidad en el juego.
- * Una entidad puede ser cualquier objeto en el juego que tenga una posición y una velocidad,
- * y puede tener una imagen asociada para representarlo visualmente.
+ * La clase abstracta Entidad representa entidades en el juego, como jugadores y enemigos.
+ * @author     Grupo 6
+ * @author	   Escuela Politécnica Nacional
+ * @version     1.0
  */
-public class Entidad {
+public abstract class Entidad {
 
-    // Coordenadas de la entidad en el mundo del juego.
+    PanelJuego pj;
     public int mundoX, mundoY;
-    // Velocidad de la entidad.
     public int velocidad;
-    // Imágenes de la entidad en diferentes direcciones.
     public BufferedImage arriba1, arriba2, abajo1, abajo2, izquierda1, izquierda2, derecha1, derecha2;
-    // Dirección actual de la entidad.
-    public String direccion;
-    // Contador para controlar el cambio de sprites en la animación.
+    public String direccion = "abajo";
     public int contadorSprite = 0;
-    // Número de sprite actual en la animación.
     public int numSprite = 1;
-    // Área sólida de la entidad para la detección de colisiones.
-    public Rectangle areaSolida;
-    // Coordenadas predeterminadas del área sólida.
+    public Rectangle areaSolida = new Rectangle(0, 0, 48, 48);
     public int areaSolidaPredetermindaX, areaSolidaPredetermindaY;
-    // Indica si la detección de colisiones está activada para esta entidad.
     public boolean colisionActivada = false;
+    public int tipo;
+
+    /**
+     * Constructor de la clase Entidad.
+     *
+     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     */
+    public Entidad(PanelJuego pj) {
+        this.pj = pj;
+    }
+
+    /**
+     * Configura una imagen a partir de su nombre.
+     *
+     * @param nombreImagen Nombre de la imagen a cargar.
+     * @return La imagen cargada.
+     */
+    public BufferedImage configuararImagen(String nombreImagen) {
+
+        GestorImagen gImagen = new GestorImagen();
+        BufferedImage imagen = null;
+
+        try {
+            imagen = ImageIO.read(getClass().getResourceAsStream(nombreImagen + ".png"));
+            imagen = gImagen.escalarImagen(imagen, pj.tamañoTile, pj.tamañoTile);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imagen;
+    }
 }

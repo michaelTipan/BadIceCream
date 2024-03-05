@@ -4,38 +4,28 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
- * La clase ManejadorTeclas implementa KeyListener y se encarga de gestionar las entradas del teclado.
- * Las entradas del teclado incluyen las teclas de movimiento (arriba, abajo, izquierda, derecha) y las teclas de acción (enter, p).
+ * La clase ManejadorTeclas gestiona los eventos de teclado en el juego.
+ * @author     Grupo 6
+ * @author	   Escuela Politécnica Nacional
+ * @version     1.0
  */
 public class ManejadorTeclas implements KeyListener {
 
-    // Indica si las teclas de movimiento están presionadas.
     public boolean arribaPresionado, abajoPresionado, izquierdaPresionado, derechaPresionado;
-    // Instancia de PanelJuego para acceder a las propiedades del juego.
     PanelJuego pj;
 
     /**
      * Constructor de la clase ManejadorTeclas.
-     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     * @param pj Referencia al panel de juego.
      */
     public ManejadorTeclas(PanelJuego pj) {
         this.pj = pj;
     }
 
-    /**
-     * Método vacío que se invoca cuando se escribe una tecla.
-     * Este método no se utiliza en este juego.
-     * @param e Evento de teclado.
-     */
     @Override
     public void keyTyped(KeyEvent e) {
     }
 
-    /**
-     * Maneja las entradas del teclado cuando se presiona una tecla.
-     * Este método se encarga de actualizar el estado del juego y la dirección del jugador en función de la tecla que se presiona.
-     * @param e Evento de teclado.
-     */
     @Override
     public void keyPressed(KeyEvent e) {
         int codigo = e.getKeyCode(); // Número de tecla presionada
@@ -54,17 +44,15 @@ public class ManejadorTeclas implements KeyListener {
             if (codigo == KeyEvent.VK_ENTER) {
                 if (pj.interfazUsuario.numeroComando == 0) {
                     pj.estadoJuego = pj.estadoJugar;
-                    //pj.iniciarMusica
                 }
                 if (pj.interfazUsuario.numeroComando == 1) {
-                    //
+                    pj.estadoJuego = pj.estadoJugar;
+                    pj.cargarGuardar.cargar();
                 }
                 if (pj.interfazUsuario.numeroComando == 2) {
                     System.exit(0); // Salir del juego
                 }
-
             }
-
         }
 
         // Estado Juego
@@ -76,22 +64,46 @@ public class ManejadorTeclas implements KeyListener {
             if (codigo == KeyEvent.VK_A) izquierdaPresionado = true;
             if (codigo == KeyEvent.VK_D) derechaPresionado = true;
             if (codigo == KeyEvent.VK_P) pj.estadoJuego = pj.estadoPausa;
+            if (codigo == KeyEvent.VK_SPACE) pj.jugador.construirHielo();
+            if (codigo == KeyEvent.VK_E) pj.jugador.destruirHielo();
 
         } else if (pj.estadoJuego == pj.estadoPausa) {
             if (codigo == KeyEvent.VK_P) pj.estadoJuego = pj.estadoJugar;
+        } else if (pj.estadoJuego == pj.estadoGameOver) {
+            estadoGameOver(codigo);
         }
+
     }
 
     /**
-     * Maneja las entradas del teclado cuando se libera una tecla.
-     * Este método se encarga de actualizar el estado de las teclas de movimiento cuando se liberan.
-     * @param e Evento de teclado.
+     * Gestiona las teclas cuando el juego está en el estado de game over.
+     * @param codigo Número de tecla presionada.
      */
+    private void estadoGameOver(int codigo) {
+        if (codigo == KeyEvent.VK_ENTER) {
+            if (pj.interfazUsuario.numeroComando == 0) {
+                pj.estadoJuego = pj.estadoJugar;
+                pj.reiniciarJuego(false);
+            } else if (pj.interfazUsuario.numeroComando == 1) {
+                pj.estadoJuego = pj.estadoMenu; // Salir del juego
+                pj.reiniciarJuego(true);
+            }
+        }
+        if (codigo == KeyEvent.VK_W) {
+            pj.interfazUsuario.numeroComando--;
+            if (pj.interfazUsuario.numeroComando < 0) pj.interfazUsuario.numeroComando = 1;
+        }
+        if (codigo == KeyEvent.VK_S) {
+            pj.interfazUsuario.numeroComando++;
+            if (pj.interfazUsuario.numeroComando > 1) pj.interfazUsuario.numeroComando = 0;
+        }
+        pj.interfazUsuario.dibujarPantallaGameOver();
+    }
+
     @Override
     public void keyReleased(KeyEvent e) {
         int codigo = e.getKeyCode(); // Número de tecla liberada
 
-        // Cambiar el estado de las variables de dirección en función de la tecla liberada
         if (codigo == KeyEvent.VK_W) {
             arribaPresionado = false;
         }

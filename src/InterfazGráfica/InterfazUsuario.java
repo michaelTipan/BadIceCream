@@ -4,41 +4,31 @@ import java.awt.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
 
 /**
- * La clase InterfazUsuario se encarga de gestionar la interfaz de usuario del juego.
- * La interfaz de usuario incluye elementos como el menú, los mensajes, la vida del jugador y el tiempo de juego.
+ * InterfazUsuario gestiona la interfaz gráfica del usuario en el juego.
+ * Administra la representación de la vida del jugador, los objetos recogidos, mensajes en pantalla, etc.
+ * @author     Grupo 6
+ * @author	   Escuela Politécnica Nacional
+ * @version     1.0
  */
 public class InterfazUsuario {
 
-    // Instancia de PanelJuego para acceder a las propiedades del juego.
     PanelJuego pj;
-    // Objeto Graphics2D para dibujar en la pantalla.
     Graphics2D g2;
-    // Fuentes para dibujar texto en la pantalla.
     Font arial_40, arial_80B;
-    // Imágenes para representar la vida del jugador y los objetos recogidos.
     BufferedImage imagenBanana, imagenUva, corazon_Completo, corazon_Lastimado, corazon_Vacio;
-    // Indica si se está mostrando un mensaje en la pantalla.
     public boolean mensajeActivado = false;
-    // El mensaje que se está mostrando en la pantalla.
     public String mensaje = "";
-    // Indica si el juego ha finalizado.
     public boolean juegoFinalizado = false;
-    // Número de comando actual en el menú.
     public int numeroComando = 0;
-    // Tiempo de juego en segundos.
-    double tiempoDeJuego = 0;
-    // Indica si el juego está en pausa.
-    public boolean enPausa = false;
-    // Formato para mostrar el tiempo de juego con dos decimales.
-    DecimalFormat formatoDecimal = new DecimalFormat("#0.00");
+    public InterfazLógica.GestorTiempo gestorTiempo= new InterfazLógica.GestorTiempo();
 
     /**
      * Constructor de la clase InterfazUsuario.
-     * Inicializa las variables de instancia y carga las imágenes de los objetos y la vida del jugador.
-     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     * Inicializa las fuentes y carga las imágenes de los objetos y los corazones.
+     *
+     * @param pj El panel de juego asociado a la interfaz.
      */
     public InterfazUsuario(PanelJuego pj) {
         this.pj = pj;
@@ -55,20 +45,6 @@ public class InterfazUsuario {
         corazon_Vacio = corazon.imagen3;
     }
 
-    /**
-     * Muestra un mensaje en la pantalla.
-     * @param texto El texto del mensaje.
-     */
-    public void mostrarMensaje(String texto) {
-        mensaje = texto;
-        mensajeActivado = true;
-    }
-
-    /**
-     * Dibuja la interfaz de usuario en la pantalla.
-     * La interfaz de usuario incluye el menú, los mensajes, la vida del jugador y el tiempo de juego.
-     * @param g2 Objeto Graphics2D para dibujar en la pantalla.
-     */
     public void dibujar(Graphics2D g2) {
         this.g2 = g2;
 
@@ -80,72 +56,131 @@ public class InterfazUsuario {
         }
 
         if (pj.estadoJuego == pj.estadoJugar) {
-
             mostrarVidaJugador();
-
-            if (!enPausa) {
-                tiempoDeJuego += (double) 1 / 60;
-                g2.drawString("Tiempo: " + formatoDecimal.format(tiempoDeJuego) + " s", pj.tamañoTile * 9, 86);
-            }
-
-            g2.setFont(arial_40);
-            g2.setColor(Color.pink);
-            g2.drawImage(imagenBanana, pj.tamañoTile / 2, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null); // Dibujar la imagen de la banana en la interfaz usuario
-            g2.drawString("x " + pj.gestorActivos.cantidadBananas, 74, 86);
-
-            if (pj.gestorActivos.cantidadBananas != 0) {
-                g2.drawImage(imagenBanana, pj.tamañoTile / 2, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null);
-                g2.drawString("x " + pj.gestorActivos.cantidadBananas, 74, 86);
-            } else {
-
-                // Dibuja la imagen de la uva y muestra la cantidad de uvas en su lugar
-                g2.drawImage(imagenUva, pj.tamañoTile * 4, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null);
-                g2.drawString("x " + pj.gestorActivos.cantidadUvas, 250, 86);
-            }
-            enPausa = false;
+            dibujarPantallaJuego(g2);
+            gestorTiempo.setEnPausa(false); // Asegurarse de que el tiempo no esté en pausa
         }
 
         if (pj.estadoJuego == pj.estadoPausa) {
             dibujarPantallaPausa();
             mostrarVidaJugador();
-            enPausa = true;
+            gestorTiempo.setEnPausa(true);
+        }
+
+        if (pj.estadoJuego == pj.estadoGameOver) {
+            dibujarPantallaGameOver();
         }
 
         if (juegoFinalizado) {
+            dibujarPantallaFinal(g2);
 
-            g2.setFont(arial_80B);
-            g2.setColor(Color.red);
-
-            String texto;
-            int x;
-            int y;
-
-            texto = "Nivel Finalizado!!!";
-            x = obtenerXparaTextoCentrado(texto);
-            y = pj.altoPantalla / 2 + (pj.tamañoTile * 2);
-            g2.drawString(texto, x, y);
-
-            g2.setFont(arial_40);
-
-            texto = "Tu tiempo fue: " + formatoDecimal.format(tiempoDeJuego) + "!";
-            x = obtenerXparaTextoCentrado(texto);
-            y = pj.altoPantalla / 2 + (pj.tamañoTile * 4);
-            g2.drawString(texto, x, y);
             pj.hiloJuego = null;
         }
     }
 
     /**
-     * Muestra la vida del jugador en la interfaz de usuario.
-     * Dibuja corazones vacíos para la vida máxima del jugador y corazones llenos para la vida actual del jugador.
+     * Dibuja la pantalla del final del juego.
+     *
+     * @param g2 El contexto gráfico en el que se dibujará la pantalla de juego.
+     */
+    private void dibujarPantallaFinal(Graphics2D g2) {
+        g2.setFont(arial_80B);
+        g2.setColor(Color.red);
+
+        String texto;
+        int x;
+        int y;
+
+        texto = "Juego Finalizado!!!";
+        x = obtenerXparaTextoCentrado(texto);
+        y = pj.altoPantalla / 2 + (pj.tamañoTile * 2);
+        g2.drawString(texto, x, y);
+
+        g2.setFont(arial_40);
+
+        texto = "Tu tiempo fue: " + gestorTiempo.getTiempoFormateado();
+        x = obtenerXparaTextoCentrado(texto);
+        y = pj.altoPantalla / 2 + (pj.tamañoTile * 4);
+        g2.drawString(texto, x, y);
+
+        texto = "Puntos: " + pj.gestorPuntuacion.getPuntos();
+        x = obtenerXparaTextoCentrado(texto);
+        y = pj.altoPantalla / 2 + (pj.tamañoTile * 5);
+        g2.drawString(texto, x, y);
+    }
+
+    /**
+     * Dibuja la pantalla de juego.
+     *
+     * @param g2 El contexto gráfico en el que se dibujará la pantalla de juego.
+     */
+    private void dibujarPantallaJuego(Graphics2D g2) {
+        if (!gestorTiempo.enPausa()) {
+            gestorTiempo.actualizarTiempo();
+            g2.drawString("Tiempo: " + gestorTiempo.getTiempoFormateado() + " s", pj.tamañoTile * 9, 86);
+        }
+
+        g2.setFont(arial_40);
+        g2.setColor(Color.pink);
+        g2.drawImage(imagenBanana, pj.tamañoTile / 2, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null); // Dibujar la imagen de la banana en la interfaz usuario
+        g2.drawString("x " + pj.gestorActivos.cantidadBananas, 74, 86);
+        g2.drawString("Puntos: " + pj.gestorPuntuacion.getPuntos(), pj.tamañoTile, 150);
+
+        if (pj.gestorActivos.cantidadBananas != 0) {
+            g2.drawImage(imagenBanana, pj.tamañoTile / 2, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null);
+            g2.drawString("x " + pj.gestorActivos.cantidadBananas, 74, 86);
+        } else {
+            // Dibuja la imagen de la uva y muestra la cantidad de uvas en su lugar
+            g2.drawImage(imagenUva, pj.tamañoTile * 4, pj.tamañoTile, pj.tamañoTile, pj.tamañoTile, null);
+            g2.drawString("x " + pj.gestorActivos.cantidadUvas, 250, 86);
+        }
+    }
+
+    /**
+     * Dibuja la pantalla de Game Over.
+     */
+    public void dibujarPantallaGameOver() {
+        g2.setColor(new Color(0, 0, 0, 150));
+        g2.fillRect(0, 0, pj.anchoPantalla, pj.altoPantalla);
+
+        int x;
+        int y;
+        String texto;
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 110f));
+        texto = "Game Over";
+        //sombre
+        g2.setColor(Color.black);
+        x = obtenerXparaTextoCentrado(texto);
+        y = pj.tamañoTile * 4;
+        g2.drawString(texto, x, y);
+        // Principal
+        g2.setColor(Color.white);
+        g2.drawString(texto, x - 4, y - 4);
+        // Reintentar
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 40f));
+        texto = "Reintentar";
+        x = obtenerXparaTextoCentrado(texto);
+        y += pj.tamañoTile * 2;
+        g2.drawString(texto, x, y);
+        if (numeroComando == 0) g2.drawString(">", x - pj.tamañoTile, y);
+        // Rendirse
+        texto = "Rendirse";
+        x = obtenerXparaTextoCentrado(texto);
+        y += pj.tamañoTile;
+        g2.drawString(texto, x, y);
+        if (numeroComando == 1) g2.drawString(">", x - pj.tamañoTile, y);
+    }
+
+    /**
+     * Muestra la representación gráfica de la vida del jugador en la interfaz.
+     * Utiliza imágenes de corazones para indicar la cantidad de vida restante del jugador.
+     * Los corazones vacíos representan la vida faltante, los corazones dañados representan la vida restante y los corazones completos representan la vida recuperada.
      */
     private void mostrarVidaJugador() {
-        pj.jugador.vida = 1;
         int x = pj.tamañoTile * 9;
         int y = pj.tamañoTile * 2;
         int i = 0;
 
-        // Dibujar corazones vacíos para la vida máxima del jugador.
         while (i < pj.jugador.vidaMaxima / 2) {
             g2.drawImage(corazon_Vacio, x, y, null);
             i++;
@@ -155,7 +190,6 @@ public class InterfazUsuario {
         y = pj.tamañoTile * 2;
         i = 0;
 
-        // Dibujar corazones llenos para la vida actual del jugador.
         while (i < pj.jugador.vida) {
             g2.drawImage(corazon_Lastimado, x, y, null);
             i++;
@@ -166,33 +200,30 @@ public class InterfazUsuario {
     }
 
     /**
-     * Dibuja la pantalla del menú.
-     * Muestra el título del juego, una imagen del jugador y las opciones del menú.
+     * Dibuja la pantalla de menú del juego.
      */
-    private void dibujarPantallaMenu() {
-        // Dibujar el fondo.
+    public void dibujarPantallaMenu() {
+        //Fondo
         g2.setColor(new Color(64, 229, 223));
         g2.fillRect(0, 0, pj.anchoPantalla, pj.altoPantalla);
 
-        // Dibujar el título del juego.
+        //Nombre
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 96F));
         String texto = "Bad Ice Cream";
         int x = obtenerXparaTextoCentrado(texto);
         int y = pj.tamañoTile * 3;
 
-        // Dibujar la sombra del título.
+        //Sombre
         g2.setColor(Color.black);
         g2.drawString(texto, x + 5, y + 5);
-        // Dibujar el título.
+        //Color principal
         g2.setColor(Color.white);
         g2.drawString(texto, x, y);
-
-        // Dibujar una imagen del jugador.
+        //Imagen Helado
         x = pj.anchoPantalla / 2 - (pj.tamañoTile * 2) / 2;
         y += pj.tamañoTile * 2;
         g2.drawImage(pj.jugador.abajo1, x, y, pj.tamañoTile * 2, pj.tamañoTile * 2, null);
-
-        // Dibujar las opciones del menú.
+        //Menu
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48F));
 
         texto = "Nueva Partida";
@@ -215,8 +246,7 @@ public class InterfazUsuario {
     }
 
     /**
-     * Dibuja la pantalla de pausa.
-     * Muestra el texto "PAUSA" en el centro de la pantalla.
+     * Dibuja la pantalla de pausa del juego.
      */
     public void dibujarPantallaPausa() {
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 80F));
@@ -228,13 +258,15 @@ public class InterfazUsuario {
     }
 
     /**
-     * Obtiene la posición x para centrar un texto en la pantalla.
-     * @param texto El texto que se va a centrar.
+     * Calcula la posición x para centrar un texto en la pantalla.
+     *
+     * @param texto El texto cuya posición x se calculará para centrarlo.
      * @return La posición x para centrar el texto en la pantalla.
      */
     public int obtenerXparaTextoCentrado(String texto) {
         int longitudTexto = (int) g2.getFontMetrics().getStringBounds(texto, g2).getWidth();
         int x = pj.anchoPantalla / 2 - longitudTexto / 2;
-        return x;
+        return x; // Devuelve la posición x para centrar el texto en la pantalla
     }
+
 }

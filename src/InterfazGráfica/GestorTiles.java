@@ -1,5 +1,8 @@
 package InterfazGráfica;
 
+import InterfazGráfica.GestorImagen;
+import InterfazGráfica.PanelJuego;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.BufferedReader;
@@ -8,91 +11,83 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * La clase GestorTiles se encarga de gestionar los tiles del juego.
- * Cada tile es una imagen que se utiliza para dibujar el mundo del juego.
+ * La clase GestorTiles gestiona los tiles del mapa del juego.
+ * @author      Grupo 6
+ * @author	   Escuela Politécnica Nacional
+ * @version     1.0
  */
 public class GestorTiles {
 
-    // Instancia de PanelJuego para acceder a las propiedades del juego.
     PanelJuego pj;
-    // Array de tiles.
-    Tile[] tile;
-    // Mapa de tiles representado como un array bidimensional de números enteros.
-    int numTileMapa[][];
+    public Tile[] tile;
+    public int[][][] numTileMapa;
 
     /**
-     * Constructor de la clase GestorTiles.
-     * Inicializa las variables de instancia y carga los tiles y el mapa del juego.
-     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     * Crea un nuevo GestorTiles para el panel de juego dado.
+     * @param pj El panel de juego al que pertenece el gestor de tiles.
      */
     public GestorTiles(PanelJuego pj) {
         this.pj = pj;
 
-        // Inicializar el array de tiles y el mapa de tiles.
         tile = new Tile[10];
-        numTileMapa = new int[pj.maxColMundo][pj.maxFilaMundo];
+        numTileMapa = new int[pj.maxMapa][pj.maxColMundo][pj.maxFilaMundo];
 
-        // Obtener las imágenes de los tiles y cargar el mapa del juego.
         obtenerImagenesTile();
-        cargarMapa("/maps/world01.txt");
+        cargarMapa("/maps/world01.txt", 0);
+        cargarMapa("/maps/world02.txt", 1);
+        cargarMapa("/maps/world03.txt", 2);
     }
 
     /**
-     * Obtiene las imágenes de los tiles a partir de archivos.
-     * Configura los tiles con las imágenes y las propiedades de colisión correspondientes.
+     * Obtiene las imágenes de los diferentes tipos de tiles.
      */
     public void obtenerImagenesTile() {
 
-        // Configurar los tiles con las imágenes y las propiedades de colisión.
         configurar(0, "snow", false);
         configurar(1, "block", true);
+        configurar(2, "igloo", false);
     }
 
     /**
-     * Configura un tile con una imagen y una propiedad de colisión.
-     * @param indice El índice del tile en el array.
-     * @param nombreImagen El nombre del archivo de la imagen del tile.
-     * @param colision Si el tile es colisionable o no.
+     * Configura un tipo de tile con su respectiva imagen y si tiene colisión.
+     * @param indice El índice del tile.
+     * @param nombreImagen El nombre del archivo de imagen del tile.
+     * @param colision Indica si el tile tiene colisión.
      */
     public void configurar(int indice, String nombreImagen, boolean colision) {
 
-        // Crear una nueva instancia de GestorImagen para escalar la imagen del tile.
         GestorImagen gImagen = new GestorImagen();
 
         try {
-            // Crear un nuevo tile y configurarlo con la imagen y la propiedad de colisión.
             tile[indice] = new Tile();
             tile[indice].imagen = ImageIO.read(getClass().getResourceAsStream("/tiles/" + nombreImagen + ".png"));
             tile[indice].imagen = gImagen.escalarImagen(tile[indice].imagen, pj.tamañoTile, pj.tamañoTile);
             tile[indice].colision = colision;
 
         } catch (IOException e) {
-            // Imprimir la traza de la pila si ocurre una excepción al leer la imagen del tile.
             e.printStackTrace();
         }
     }
 
     /**
-     * Carga el mapa del juego a partir de un archivo de texto.
-     * El archivo de texto contiene la disposición de los tiles en el mundo del juego.
-     * @param filePath Ruta del archivo de texto que contiene la disposición de los tiles.
+     * Carga el mapa de tiles desde un archivo de texto.
+     * @param filePath La ruta del archivo de texto que contiene el mapa de tiles.
+     * @param mapa El índice del mapa en el que se cargará el archivo.
      */
-    public void cargarMapa(String filePath) {
+    public void cargarMapa(String filePath, int mapa) {
         try {
-            // Abrir el archivo de texto para lectura.
             InputStream is = getClass().getResourceAsStream(filePath);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             int col = 0;
             int fila = 0;
 
-            // Leer cada línea del archivo y cargar los tiles en el mapa de tiles.
             while (col < pj.maxColMundo && fila < pj.maxFilaMundo) {
                 String linea = br.readLine();
                 while (col < pj.maxColMundo) {
                     String[] numeros = linea.split(" ");
                     int num = Integer.parseInt(numeros[col]);
-                    numTileMapa[col][fila] = num;
+                    numTileMapa[mapa][col][fila] = num;
                     col++;
                 }
                 if (col == pj.maxColMundo) {
@@ -100,37 +95,32 @@ public class GestorTiles {
                     fila++;
                 }
             }
-            // Cerrar el archivo de texto.
             br.close();
         } catch (Exception e) {
-            // Imprimir la traza de la pila si ocurre una excepción al cargar el mapa del juego.
             e.printStackTrace();
         }
     }
 
     /**
-     * Dibuja los tiles en el panel del juego.
-     * Solo dibuja los tiles que están en la vista del jugador.
-     * @param g2 Instancia de Graphics2D para dibujar los tiles.
+     * Dibuja los tiles en el panel de juego.
+     * @param g2 El contexto gráfico en el que se dibujarán los tiles.
      */
     public void dibujar(Graphics2D g2) {
         int colMundo = 0;
         int filaMundo = 0;
 
-        // Recorrer cada tile en el mapa de tiles y dibujarlo en el panel del juego.
         while (colMundo < pj.maxColMundo && filaMundo < pj.maxFilaMundo) {
-            int numTile = numTileMapa[colMundo][filaMundo];
+            int numTile = numTileMapa[pj.mapaActual][colMundo][filaMundo];
             int mundoX = colMundo * pj.tamañoTile;
             int mundoY = filaMundo * pj.tamañoTile;
             int pantallaX = mundoX - pj.jugador.mundoX + pj.jugador.pantallaX;
             int pantallaY = mundoY - pj.jugador.mundoY + pj.jugador.pantallaY;
 
-            // Solo dibujar los tiles que están en la vista del jugador.
             if (mundoX + pj.tamañoTile > pj.jugador.mundoX - pj.jugador.pantallaX &&
                     mundoX - pj.tamañoTile < pj.jugador.mundoX + pj.jugador.pantallaX &&
                     mundoY + pj.tamañoTile > pj.jugador.mundoY - pj.jugador.pantallaY &&
                     mundoY - pj.tamañoTile < pj.jugador.mundoY + pj.jugador.pantallaY) {
-                g2.drawImage(tile[numTile].imagen, pantallaX, pantallaY,null);
+                g2.drawImage(tile[numTile].imagen, pantallaX, pantallaY, null);
             }
             colMundo++;
             if (colMundo == pj.maxColMundo) {

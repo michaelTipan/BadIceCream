@@ -1,37 +1,34 @@
 package InterfazGráfica;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 /**
- * La clase Jugador extiende de la clase Entidad y representa al jugador en el juego.
- * El jugador tiene una posición en la pantalla, una vida, una velocidad y una dirección.
- * El jugador también tiene una imagen que se muestra en la pantalla.
+ * La clase Jugador representa al personaje controlado por el jugador en el juego.
+ * @author     Grupo 6
+ * @author	   Escuela Politécnica Nacional
+ * @version     1.0
  */
 public class Jugador extends Entidad {
 
-    // Instancia de PanelJuego para acceder a las propiedades del juego.
-    PanelJuego pj;
-    // Instancia de ManejadorTeclas para manejar las entradas del teclado.
     ManejadorTeclas mt;
 
-    // Posición del jugador en la pantalla.
     public final int pantallaX;
     public final int pantallaY;
-    // Vida máxima y actual del jugador.
     public int vidaMaxima;
     public int vida;
+    public boolean invencible = false;
+    public int contadorDeInvencibilidad = 0;
+    private int ultimaPosicionX;
+    private int ultimaPosicionY;
 
     /**
      * Constructor de la clase Jugador.
-     * Inicializa las variables de instancia y carga las imágenes del jugador.
-     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
-     * @param mt Instancia de ManejadorTeclas para manejar las entradas del teclado.
+     * @param pj Referencia al panel de juego.
+     * @param mt Manejador de teclas.
      */
     public Jugador(PanelJuego pj, ManejadorTeclas mt) {
-        this.pj = pj;
+        super(pj);
         this.mt = mt;
 
         pantallaX = pj.anchoPantalla / 2 - (pj.tamañoTile / 2); // Centrar jugador en la pantalla (x)
@@ -50,13 +47,32 @@ public class Jugador extends Entidad {
     }
 
     /**
-     * Establece los valores predeterminados para el jugador.
-     * Los valores predeterminados incluyen la posición inicial, la velocidad y la dirección del jugador, y la vida máxima y actual.
+     * Método para obtener las imágenes del jugador.
+     */
+    public void obtenerImagenJugador() {
+
+        arriba1 = configuararImagen("/player/boy_up_1");
+        arriba2 = configuararImagen("/player/boy_up_2");
+        abajo1 = configuararImagen("/player/boy_down_1");
+        abajo2 = configuararImagen("/player/boy_down_2");
+        izquierda1 = configuararImagen("/player/boy_left_1");
+        izquierda2 = configuararImagen("/player/boy_left_2");
+        derecha1 = configuararImagen("/player/boy_right_1");
+        derecha2 = configuararImagen("/player/boy_right_2");
+    }
+
+    /**
+     * Método para establecer los valores predeterminados del jugador.
      */
     public void establecerValoresPredeterminados() {
+        if (pj.mapaActual == 1 || pj.mapaActual == 2) {
+            mundoX = pj.tamañoTile * 8;
+            mundoY = pj.tamañoTile * 8;
+        } else {
+            mundoX = pj.tamañoTile * 8;
+            mundoY = pj.tamañoTile * 12;
+        }
 
-        mundoX = pj.tamañoTile * 8;
-        mundoY = pj.tamañoTile * 12;
         velocidad = 4;
         direccion = "abajo"; // Dirección inicial del jugador (arriba)
 
@@ -65,73 +81,80 @@ public class Jugador extends Entidad {
         vida = vidaMaxima;
     }
 
-    /**
-     * Obtiene las imágenes del jugador.
-     * Las imágenes incluyen las imágenes del jugador mirando hacia arriba, hacia abajo, hacia la izquierda y hacia la derecha.
-     */
-    public void obtenerImagenJugador() {
-
-        arriba1 = configuararImagen("boy_up_1");
-        arriba2 = configuararImagen("boy_up_2");
-        abajo1 = configuararImagen("boy_down_1");
-        abajo2 = configuararImagen("boy_down_2");
-        izquierda1 = configuararImagen("boy_left_1");
-        izquierda2 = configuararImagen("boy_left_2");
-        derecha1 = configuararImagen("boy_right_1");
-        derecha2 = configuararImagen("boy_right_2");
-    }
 
     /**
-     * Configura una imagen del jugador.
-     * La imagen se escala al tamaño de un tile del juego.
-     * @param nombreImagen El nombre de la imagen.
-     * @return La imagen configurada.
+     * Recoge el objeto en la posición especificada en la lista de objetos del panel de juego.
+     * Este método se activa cuando el jugador interactúa con un objeto en el juego.
+     * Si el índice de objeto es válido (diferente de 999), se verifica el tipo de objeto y se realiza la acción correspondiente.
+     * Si el objeto es una "Banana", se elimina de la lista de objetos y se ajustan las variables relacionadas con las bananas en el juego.
+     * Si la cantidad de bananas llega a cero, se activa un evento para que aparezcan las uvas en el juego.
+     * Si el objeto es una "Uva" visible, se elimina de la lista de objetos y se ajustan las variables relacionadas con las uvas en el juego.
+     * Además, se suman puntos al puntaje del jugador en función del tipo de objeto recogido.
+     *
+     * @param i Índice del objeto en la lista de objetos del panel de juego.
      */
-    public BufferedImage configuararImagen(String nombreImagen) {
+    public void recogerObjetos(int i) {
 
-        GestorImagen gImagen = new GestorImagen();
-        BufferedImage imagen = null;
+        if (i != 999) {
 
-        try {
-            imagen = ImageIO.read(getClass().getResourceAsStream("/player/" + nombreImagen + ".png"));
-            imagen = gImagen.escalarImagen(imagen, pj.tamañoTile, pj.tamañoTile);
+            String nombreObjeto = pj.objetos.get(i).nombre;
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            switch (nombreObjeto) {
+                case "Banana":
+                    pj.objetos.remove(i);
+                    pj.gestorActivos.cantidadBananas--; // Decrementar la cantidad de bananas en el juego
+                    pj.gestorPuntuacion.sumarPuntos(50);
+                    if (pj.gestorActivos.cantidadBananas == 0) {
+                        pj.gestorEventos.hacerQueAparezcanLasUvas();
+                    }
+                    break;
+
+                case "Uva":
+                    if (pj.objetos.get(i).visible) {
+                        pj.objetos.remove(i);
+                        pj.gestorActivos.cantidadUvas--; // Decrementar la cantidad de uvas en el juego
+                        pj.gestorPuntuacion.sumarPuntos(100);
+                    }
+                    break;
+            }
         }
-        return imagen;
     }
 
     /**
-     * Actualiza el estado del jugador en cada frame del juego.
-     * Este método se encarga de manejar las entradas del teclado, actualizar la dirección del jugador,
-     * comprobar las colisiones con los tiles y los objetos, recoger los objetos, y actualizar la posición y el sprite del jugador.
+     * Método para actualizar el estado del jugador.
      */
     public void actualizar() {
 
-        // Comprobar si alguna tecla de movimiento está presionada.
-        if (mt.arribaPresionado == true || mt.abajoPresionado == true || mt.izquierdaPresionado == true || mt.derechaPresionado == true) {
+        if (mt.arribaPresionado || mt.abajoPresionado || mt.izquierdaPresionado || mt.derechaPresionado) {
 
-            // Actualizar la dirección del jugador en función de la tecla de movimiento que está presionada.
-            if (mt.arribaPresionado == true) {
+            if (mt.arribaPresionado) {
                 direccion = "arriba";
-            } else if (mt.abajoPresionado == true) {
+            } else if (mt.abajoPresionado) {
                 direccion = "abajo";
-            } else if (mt.izquierdaPresionado == true) {
+            } else if (mt.izquierdaPresionado) {
                 direccion = "izquierda";
-            } else if (mt.derechaPresionado == true) {
+            } else if (mt.derechaPresionado) {
                 direccion = "derecha";
             }
 
-            // Comprobar la colisión con los tiles.
+            // comprobar colision con tile
             colisionActivada = false;
             pj.comprobadorColisiones.comprobarTile(this);
 
-            // Comprobar la colisión con los objetos.
+            // comprobar colision con objetos
             int objetoIndex = pj.comprobadorColisiones.comprobarObjeto(this, true);
             recogerObjetos(objetoIndex);
 
-            // Si no hay colisión, actualizar la posición del jugador y el sprite.
+            int enemigoIndex = pj.comprobadorColisiones.comprobarEntidad(this, pj.enemigos);
+            contactoConEnemigo(enemigoIndex);
+
+            if (pj.gestorActivos.cantidadUvas == 0) {
+                pj.gestorEventos.comprobarEvento();
+            }
+
+            pj.gestorEventos.comprobarVictoria();
+
+
             if (colisionActivada == false) {
                 switch (direccion) {
                     case "arriba":
@@ -148,7 +171,6 @@ public class Jugador extends Entidad {
                         break;
                 }
 
-                // Actualizar el sprite del jugador.
                 contadorSprite++;
                 if (contadorSprite > 12) {
                     if (numSprite == 1) {
@@ -160,64 +182,42 @@ public class Jugador extends Entidad {
                 }
             }
         }
+
+        if (invencible) {
+            contadorDeInvencibilidad++;
+            if (contadorDeInvencibilidad > 120) {
+                invencible = false;
+                contadorDeInvencibilidad = 0;
+            }
+        }
+        ultimaPosicionX = mundoX;
+        ultimaPosicionY = mundoY;
+
     }
 
     /**
-     * Recoge los objetos en el juego.
-     * Si el jugador colisiona con un objeto, el objeto se elimina y se actualiza la cantidad de objetos en el juego.
-     * @param i El índice del objeto con el que el jugador está colisionando.
+     * Método para gestionar el contacto del jugador con enemigos.
+     * @param enemigoIndex Índice del enemigo en la lista de enemigos.
      */
-    public void recogerObjetos(int i) {
-
-        if (i != 999) {
-
-            String nombreObjeto = pj.objetos.get(i).nombre;
-
-            switch (nombreObjeto) {
-                case "Banana":
-                    pj.objetos.remove(i);
-                    pj.gestorActivos.cantidadBananas--; // Decrementar la cantidad de bananas en el juego
-                    if (pj.gestorActivos.cantidadBananas == 0) {
-                        // Hacer que aparezcan las uvas
-                        hacerQueAparezcanLasUvas();
-                    }
-                    break;
-
-                case "Uva":
-                    if (pj.objetos.get(i).visible) {
-                        pj.objetos.remove(i);
-                        pj.gestorActivos.cantidadUvas--; // Decrementar la cantidad de uvas en el juego
-                        if(pj.gestorActivos.cantidadUvas == 0){
-                            pj.interfazUsuario.juegoFinalizado = true;
-                        }
-                    }
-                    break;
+    private void contactoConEnemigo(int enemigoIndex) {
+        if (enemigoIndex != 999) {
+            if (invencible == false) {
+                vida--;
+                invencible = true;
             }
+        }
+        if (vida <= 0) {
+            pj.estadoJuego = pj.estadoGameOver;
         }
     }
 
     /**
-     * Hace que aparezcan las uvas en el juego.
-     * Recorre la lista de objetos y hace visibles las uvas.
-     */
-    public void hacerQueAparezcanLasUvas() {
-        // Recorrer la lista de objetos y encontrar las uvas
-        for (ObjetoJuego objeto : pj.objetos) {
-            if (objeto instanceof ObjetoUva) {
-                objeto.visible = true; // Hacer que las uvas sean visibles
-            }
-        }
-    }
-
-    /**
-     * Dibuja al jugador en la pantalla.
-     * El jugador se dibuja en la posición del jugador y con la imagen correspondiente a la dirección y el sprite del jugador.
-     * @param g2 Instancia de Graphics2D para dibujar en la pantalla.
+     * Método para dibujar al jugador en pantalla.
+     * @param g2 Objeto Graphics2D para dibujar.
      */
     public void dibujar(Graphics2D g2) {
 
         BufferedImage imagen = null;
-        // Seleccionar la imagen del jugador en función de la dirección y el sprite actual
         switch (direccion) {
             case "arriba":
                 if (numSprite == 1) imagen = arriba1;
@@ -236,8 +236,85 @@ public class Jugador extends Entidad {
                 if (numSprite == 2) imagen = derecha2;
                 break;
         }
-        // Dibujar al jugador en la pantalla
+        if (invencible) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        }
         g2.drawImage(imagen, pantallaX, pantallaY, pj.tamañoTile, pj.tamañoTile, null);
+
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
 
+    /**
+     * Construye un bloque de hielo en la dirección del jugador si no hay otro bloque de hielo en esa posición.
+     * El método calcula las coordenadas del tile en función de la dirección del jugador y verifica si hay un bloque de hielo en esas coordenadas.
+     * Si no hay un bloque de hielo, crea uno nuevo y lo agrega a la lista de objetos del panel de juego.
+     */
+    public void construirHielo() {
+        int tileX = 0;
+        int tileY = 0;
+
+        switch (direccion) {
+            case "arriba":
+                tileX = mundoX / pj.tamañoTile;
+                tileY = (mundoY - pj.tamañoTile) / pj.tamañoTile;
+                break;
+            case "abajo":
+                tileX = mundoX / pj.tamañoTile;
+                tileY = (mundoY + pj.tamañoTile) / pj.tamañoTile;
+                break;
+            case "izquierda":
+                tileX = (mundoX - pj.tamañoTile) / pj.tamañoTile;
+                tileY = mundoY / pj.tamañoTile;
+                break;
+            case "derecha":
+                tileX = (mundoX + pj.tamañoTile) / pj.tamañoTile;
+                tileY = mundoY / pj.tamañoTile;
+                break;
+        }
+
+        // Verificar si ya hay un hielo en las coordenadas especificadas
+        if (!pj.gestorActivos.hayHielo(tileX, tileY)) {
+            ObjetoHielo hielo = new ObjetoHielo(pj);
+            hielo.mundoX = tileX * pj.tamañoTile;
+            hielo.mundoY = tileY * pj.tamañoTile;
+            pj.objetos.add(hielo);
+        }
+    }
+
+    /**
+     * Destruye un bloque de hielo en la dirección del jugador si existe uno en esa posición.
+     * El método calcula las coordenadas del tile en función de la dirección del jugador y verifica si hay un bloque de hielo en esas coordenadas.
+     * Si hay un bloque de hielo, lo elimina de la lista de objetos del panel de juego.
+     */
+    public void destruirHielo() {
+        int tileX = 0;
+        int tileY = 0;
+
+        switch (direccion) {
+            case "arriba":
+                tileX = mundoX / pj.tamañoTile;
+                tileY = (mundoY - pj.tamañoTile) / pj.tamañoTile;
+                break;
+            case "abajo":
+                tileX = mundoX / pj.tamañoTile;
+                tileY = (mundoY + pj.tamañoTile) / pj.tamañoTile;
+                break;
+            case "izquierda":
+                tileX = (mundoX - pj.tamañoTile) / pj.tamañoTile;
+                tileY = mundoY / pj.tamañoTile;
+                break;
+            case "derecha":
+                tileX = (mundoX + pj.tamañoTile) / pj.tamañoTile;
+                tileY = mundoY / pj.tamañoTile;
+                break;
+        }
+        for (ObjetoJuego objeto : pj.objetos) {
+            if (objeto instanceof ObjetoHielo) {
+                if (objeto.mundoX == tileX * pj.tamañoTile && objeto.mundoY == tileY * pj.tamañoTile) {
+                    pj.objetos.remove(objeto); // Eliminar el hielo si coincide con las coordenadas
+                    break; // Salir del bucle una vez que se ha eliminado el hielo
+                }
+            }
+        }
+    }
 }
