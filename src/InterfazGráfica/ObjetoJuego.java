@@ -8,31 +8,51 @@ import java.awt.image.BufferedImage;
  */
 public class ObjetoJuego {
 
-    public BufferedImage imagen; // Imagen del objeto
-    public String nombre; // Nombre del objeto
-    public boolean colision = false; // Indica si el objeto es colisionable
-    public int mundoX, mundoY; // Posición del objeto en el mundo del juego
-    public Rectangle areaSolida = new Rectangle(0,0,48,48); // Área sólida del objeto para las colisiones
-    public int areaSolidaPredeterminadaX = 0; // Posición X predeterminada del área sólida
-    public int getAreaSolidaPredeterminadaY = 0; // Posición Y predeterminada del área sólida
+    // Imágenes asociadas con el objeto
+    public BufferedImage imagen, imagen2, imagen3;
+
+    // Nombre del objeto
+    public String nombre;
+
+    // Indica si el objeto puede colisionar
+    public boolean colision = false;
+
+    // Indica si el objeto es visible
+    public boolean visible = true;
+
+    // Coordenadas del objeto en el mundo del juego
+    public int mundoX, mundoY;
+
+    // Área sólida del objeto
+    public Rectangle areaSolida = new Rectangle(0,0,48,48);
+
+    // Coordenadas predeterminadas del área sólida
+    public int areaSolidaPredeterminadaX = 0;
+    public int getAreaSolidaPredeterminadaY = 0;
+
+    // Gestor de imágenes
+    GestorImagen gImagen = new GestorImagen();
 
     /**
-     * Dibuja el objeto en el panel del juego.
-     * @param g2 Instancia de Graphics2D para dibujar el objeto.
-     * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
+     * Método para dibujar el objeto en el panel de juego.
+     * @param g2 Objeto Graphics2D para dibujar el objeto.
+     * @param pj PanelJuego en el que se dibuja el objeto.
      */
     public void dibujar(Graphics2D g2, PanelJuego pj) {
+        // Verificar si el objeto es visible
+        if (visible) {
+            // Calcular las coordenadas de la pantalla
+            int pantallaX = mundoX - pj.jugador.mundoX + pj.jugador.pantallaX;
+            int pantallaY = mundoY - pj.jugador.mundoY + pj.jugador.pantallaY;
 
-        // Calcular la posición del objeto en la pantalla en función de la posición del jugador
-        int pantallaX = mundoX - pj.jugador.mundoX + pj.jugador.pantallaX;
-        int pantallaY = mundoY - pj.jugador.mundoY + pj.jugador.pantallaY;
-
-        // Dibujar el objeto solo si está dentro de la vista del jugador
-        if (mundoX + pj.tamañoTile > pj.jugador.mundoX - pj.jugador.pantallaX &&
-                mundoX - pj.tamañoTile < pj.jugador.mundoX + pj.jugador.pantallaX &&
-                mundoY + pj.tamañoTile > pj.jugador.mundoY - pj.jugador.pantallaY &&
-                mundoY - pj.tamañoTile < pj.jugador.mundoY + pj.jugador.pantallaY) {
-            g2.drawImage(imagen, pantallaX, pantallaY, pj.tamañoTile, pj.tamañoTile, null);
+            // Verificar si el objeto está dentro del campo de visión del jugador
+            if (mundoX + pj.tamañoTile > pj.jugador.mundoX - pj.jugador.pantallaX &&
+                    mundoX - pj.tamañoTile < pj.jugador.mundoX + pj.jugador.pantallaX &&
+                    mundoY + pj.tamañoTile > pj.jugador.mundoY - pj.jugador.pantallaY &&
+                    mundoY - pj.tamañoTile < pj.jugador.mundoY + pj.jugador.pantallaY) {
+                // Dibujar la imagen del objeto
+                g2.drawImage(imagen, pantallaX, pantallaY, pj.tamañoTile, pj.tamañoTile, null);
+            }
         }
     }
 }

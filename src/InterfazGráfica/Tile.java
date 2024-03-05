@@ -3,11 +3,13 @@ package InterfazGráfica;
 import java.awt.image.BufferedImage;
 
 /**
- * La clase Tile representa un tile (o celda) en el juego.
- * Un tile puede contener una imagen y un indicador de si hay colisión.
+ * La clase Tile representa un tile (o celda) en un mapa de juego.
  */
 public class Tile {
 
-    public BufferedImage imagen; // La imagen del tile
-    public boolean colision = false; // Indicador de si el tile es colisionable
+    // Imagen asociada con el tile
+    public BufferedImage imagen;
+
+    // Indica si el tile puede colisionar
+    public boolean colision = false;
 }

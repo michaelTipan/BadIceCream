@@ -13,6 +13,9 @@ public class GestorActivos {
     PanelJuego pj;
     ArrayList<ObjetoJuego> objetos;
 
+    public int cantidadBananas = 0; // Inicializar la cantidad de bananas en 0
+    public int cantidadUvas = 0; // Inicializar la cantidad de uvas en 0
+
     /**
      * Constructor de la clase GestorActivos.
      * @param pj Instancia de PanelJuego para acceder a las propiedades del juego.
@@ -44,24 +47,26 @@ public class GestorActivos {
                     switch (c) {
                         case '1':
                             // Hielo
-                            ObjetoHielo hielo = new ObjetoHielo();
+                            ObjetoHielo hielo = new ObjetoHielo(pj);
                             hielo.mundoX = col * pj.tamañoTile;
                             hielo.mundoY = fila * pj.tamañoTile;
                             pj.objetos.add(hielo);
                             break;
                         case '2':
                             // Banana
-                            ObjetoBanana banana = new ObjetoBanana();
+                            ObjetoBanana banana = new ObjetoBanana(pj);
                             banana.mundoX = col * pj.tamañoTile;
                             banana.mundoY = fila * pj.tamañoTile;
                             pj.objetos.add(banana);
+                            cantidadBananas++; // Incrementar la cantidad de bananas en el juego
                             break;
                         case '3':
                             // Uva
-                            ObjetoUva uva = new ObjetoUva();
+                            ObjetoUva uva = new ObjetoUva(pj);
                             uva.mundoX = col * pj.tamañoTile;
                             uva.mundoY = fila * pj.tamañoTile;
                             pj.objetos.add(uva);
+                            cantidadUvas++; // Incrementar la cantidad de uvas en el juego
                             break;
                         default:
                             // No hacer nada si el carácter no corresponde a ningún objeto
