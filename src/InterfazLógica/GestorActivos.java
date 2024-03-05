@@ -137,22 +137,22 @@ public class GestorActivos {
 
         numeroMapa = 1;
         pj.enemigos[numeroMapa][i] = new EnemigoBasico(pj);
-        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 12;
-        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 5;
+        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 10;
+        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 3;
         i++;
 
         pj.enemigos[numeroMapa][i] = new EnemigoBasico(pj);
-        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 4;
-        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 13;
-        i++;
-
-        pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
-        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 5;
-        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 4;
-        i++;
-
-        pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
         pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 14;
+        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 14;
+        i++;
+
+        pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
+        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 3;
+        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 3;
+        i++;
+
+        pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
+        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 3;
         pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 14;
         i++;
 
@@ -160,12 +160,12 @@ public class GestorActivos {
 
         pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
         pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 12;
-        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 5;
+        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 7;
         i++;
 
         pj.enemigos[numeroMapa][i] = new EnemigoMediano(pj);
-        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 4;
-        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 13;
+        pj.enemigos[numeroMapa][i].mundoX = pj.tamañoTile * 5;
+        pj.enemigos[numeroMapa][i].mundoY = pj.tamañoTile * 10;
         i++;
 
         pj.enemigos[numeroMapa][i] = new EnemigoFinal(pj);

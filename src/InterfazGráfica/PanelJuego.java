@@ -34,7 +34,7 @@ public class PanelJuego extends JPanel implements Runnable {
     int FPS = 60; // Fotogramas por segundo
 
     // Sistema
-    public InterfazGráfica.GestorTiles gestorTiles = new InterfazGráfica.GestorTiles(this);
+    public GestorTiles gestorTiles = new GestorTiles(this);
     ManejadorTeclas manejadorTeclas = new ManejadorTeclas(this);
     Thread hiloJuego; // Hilo del juego que llama al método run
     public InterfazLógica.ComprobadorColisiones comprobadorColisiones = new InterfazLógica.ComprobadorColisiones(this);

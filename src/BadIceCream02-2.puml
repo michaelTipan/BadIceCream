@@ -1,0 +1,324 @@
+@startuml
+
+package "Interfaz Gráfica"{
+    class PanelJuego {
+      + tamañoTileOriginal: int
+      + escala: int
+      + tamañoTile: int
+      + maxColPantalla: int
+      + maxFilaPantalla: int
+      + anchoPantalla: int
+      + altoPantalla: int
+      + maxColMundo: int
+      + maxFilaMundo: int
+      + maxMapa: int
+      + mapaActual: int
+      + FPS: int
+      + gestorTiles: GestorTiles
+      + manejadorTeclas: ManejadorTeclas
+      + hiloJuego: Thread
+      + comprobadorColisiones: ComprobadorColisiones
+      + gestorActivos: GestorActivos
+      + interfazUsuario: InterfazUsuario
+      + gestorEventos: GestorEventos
+      + jugador: Jugador
+      + objetos: ArrayList<ObjetoJuego>
+      + enemigos: Enemigo[][]
+      + estadoJuego: int
+      + estadoMenu: int
+      + estadoJugar: int
+      + estadoPausa: int
+      + estadoGameOver: int
+
+      + PanelJuego()
+      + configurarJuego()
+      + reiniciarJuego()
+      + iniciarHiloJuego()
+      + run(): void
+      + actualizar(): void
+      + paintComponent(g: Graphics): void
+    }
+    class ManejadorTeclas {
+      + arribaPresionado: boolean
+      + abajoPresionado: boolean
+      + izquierdaPresionado: boolean
+      + derechaPresionado: boolean
+      + pj: PanelJuego
+
+      + ManejadorTeclas(pj: PanelJuego)
+      + keyTyped(e: KeyEvent): void
+      + keyPressed(e: KeyEvent): void
+      + keyReleased(e: KeyEvent): void
+      - estadoGameOver(codigo: int): void
+    }
+
+    class Jugador {
+      + mt: ManejadorTeclas
+      + pantallaX: int
+      + pantallaY: int
+      + vidaMaxima: int
+      + vida: int
+      + invencible: boolean
+      + contadorDeInvencibilidad: int
+      + ultimaPosicionX: int
+      + ultimaPosicionY: int
+
+      + Jugador(pj: PanelJuego, mt: ManejadorTeclas)
+      + obtenerImagenJugador(): void
+      + establecerValoresPredeterminados(): void
+      + recogerObjetos(i: int): void
+      + actualizar(): void
+      - contactoConEnemigo(enemigoIndex: int): void
+      + dibujar(g2: Graphics2D): void
+      + construirHielo(): void
+      + destruirHielo(): void
+    }
+
+    abstract class Entidad {
+        + mundoX: int
+        + mundoY: int
+        + velocidad: int
+        + arriba1: BufferedImage
+        + arriba2: BufferedImage
+        + abajo1: BufferedImage
+        + abajo2: BufferedImage
+        + izquierda1: BufferedImage
+        + izquierda2: BufferedImage
+        + derecha1: BufferedImage
+        + derecha2: BufferedImage
+        + direccion: String
+        + contadorSprite: int
+        + numSprite: int
+        + areaSolida: Rectangle
+        + areaSolidaPredetermindaX: int
+        + areaSolidaPredetermindaY: int
+        + colisionActivada: boolean
+        + tipo: int
+        + Entidad(pj: PanelJuego)
+        + configuararImagen(nombreImagen: String): BufferedImage
+    }
+
+    abstract class ObjetoJuego {
+      + imagen: BufferedImage
+      + imagen2: BufferedImage
+      + imagen3: BufferedImage
+      + nombre: String
+      + colision: boolean
+      + visible: boolean
+      + mundoX: int
+      + mundoY: int
+      + areaSolida: Rectangle
+      + areaSolidaPredeterminadaX: int
+      + getAreaSolidaPredeterminadaY: int
+
+      + dibujar(g2: Graphics2D, pj: PanelJuego): void
+    }
+
+    class ObjetoBanana {
+      - pj: PanelJuego
+      + ObjetoBanana(pj: PanelJuego)
+    }
+
+    class ObjetoCorazon {
+      - pj: PanelJuego
+      + ObjetoCorazon(pj: PanelJuego)
+    }
+
+    class ObjetoHielo {
+      - pj: PanelJuego
+      + ObjetoHielo(pj: PanelJuego)
+    }
+
+    class ObjetoUva {
+      - pj: PanelJuego
+      + ObjetoUva(pj: PanelJuego)
+    }
+
+    class GestorTiles {
+      + pj: PanelJuego
+      + tile: Tile[]
+      + numTileMapa: int[][][]
+      + GestorTiles(PanelJuego pj): void
+      + obtenerImagenesTile(): void
+      + configurar(int indice, String nombreImagen, boolean colision): void
+      + cargarMapa(String filePath, int mapa): void
+      + dibujar(Graphics2D g2): void
+    }
+
+    class Tile {
+      - imagen: BufferedImage
+      - colision: boolean
+
+      + Tile()
+    }
+
+    class GestorEventos {
+      + pj: PanelJuego
+      + evento: Evento[][][]
+      + eventoPrevioX: int
+      + eventoPrevioY: int
+      + eventoPosible: boolean
+      + GestorEventos(PanelJuego pj): void
+      + comprobarEvento(): void
+      + pulsar(int mapa, int columna, int fila, String direccion): boolean
+      + hacerQueAparezcanLasUvas(): void
+      + cambiarNivel(int mapa, int columna, int fila): void
+      + comprobarVictoria(): void
+    }
+
+    class Evento {
+      - eventoPredeterminadoX: int
+      - eventoPredeterminadoY: int
+      - eventoRealizado: boolean
+
+      + Evento()
+    }
+
+
+    class GestorImagen {
+      + escalarImagen(original: BufferedImage, ancho: int, alto: int): BufferedImage
+    }
+
+    class InterfazUsuario {
+      - pj: PanelJuego
+      - g2: Graphics2D
+      - arial_40: Font
+      - arial_80B: Font
+      - imagenBanana: BufferedImage
+      - imagenUva: BufferedImage
+      - corazon_Completo: BufferedImage
+      - corazon_Lastimado: BufferedImage
+      - corazon_Vacio: BufferedImage
+      - mensajeActivado: boolean
+      - mensaje: String
+      - juegoFinalizado: boolean
+      - numeroComando: int
+      - tiempoDeJuego: double
+      - enPausa: boolean
+      - formatoDecimal: DecimalFormat
+      + InterfazUsuario(PanelJuego pj): void
+      + mostrarMensaje(String texto): void
+      + dibujar(Graphics2D g2): void
+      + dibujarPantallaGameOver(): void
+      - mostrarVidaJugador(): void
+      + dibujarPantallaMenu(): void
+      + dibujarPantallaPausa(): void
+      + obtenerXparaTextoCentrado(String texto): int
+    }
+
+    class EnemigoBasico {
+        + EnemigoBasico(pj: PanelJuego)
+        + obtenerImagenEnemigoBasico(): void
+        + darAccion(): void
+    }
+    class EnemigoMediano {
+        + EnemigoBasico(pj: PanelJuego)
+        + obtenerImagenEnemigoBasico(): void
+        + darAccion(): void
+    }
+    class EnemigoFinal {
+        -esperando: boolean
+        -tiempoEspera: int
+        -tiempoSigueJugador: int
+        -contadorEspera: int
+        -contadorSigueJugador: int
+        -nombre: String
+        + EnemigoBasico(pj: PanelJuego)
+        + obtenerImagenEnemigoBasico(): void
+        + darAccion(): void
+
+    }
+    abstract class Enemigo {
+        + nombre: String
+        + contardeAccciones: int
+        + Enemigo(pj: PanelJuego)
+        + dibujar(g2: Graphics2D): void
+        + actualizar(): void
+        {abstract} + darAccion(): void
+    }
+
+    class CargarGuardar {
+        + pj: PanelJuego
+        + CargarGuardar(pj: PanelJuego)
+        + guardar(): void
+        + cargar(): void
+    }
+
+    class GrabadorDatos implements Serializable {
+        + vida: int
+        + mapaActual: int
+        + puntuacion: int
+        + tiempo: double
+    }
+}
+package "Interfaz Lógica"{
+    class GestorTiempo {
+        - tiempoDeJuego: double
+        - enPausa: boolean
+        - formatoDecimal: DecimalFormat
+        + GestorTiempo()
+        + actualizarTiempo(): void
+        + getTiempoFormateado(): String
+        + getTiempo(): double
+        + setTiempo(tiempo: double): void
+        + enPausa(): boolean
+        + setEnPausa(enPausa: boolean): void
+        + reiniciarTiempo(): void
+    }
+    class ComprobadorColisiones{
+        - pj: PanelJuego
+        + comprobarTile(Entidad entidad)
+        + comprobarObjeto(Entidad entidad, boolean jugador)
+        + comprobarObjetoMonstruo(Entidad entidad)
+        + comprobarEntidad(Entidad entidad, Entidad [][] objetivo)
+    }
+    class GestorActivos{
+        -pj: PanelJuego
+        -objetos: ArrayList<ObjetoJuego>
+        -cantidadBananas: int
+        -cantidadUvas: int
+        + cargarObjetos (String filePath)
+        + setCantidadBananas(int cantidadBananas)
+        + setCantidadUvas (int cantidadUvas)
+        + cargarEnemigos ()
+        + hayHielo(int tileX, int tileY)
+    }
+    class GestorPuntuacion{
+        -puntos: int
+        + sumarPuntos(int cantidad)
+        + reiniciarPuntuacion ()
+        + getPuntos ()
+        + setPuntos (int puntos)
+    }
+}
+class Main {
+}
+Main --> "1"PanelJuego
+PanelJuego --> "1" ComprobadorColisiones
+PanelJuego --> "1" GestorActivos
+PanelJuego --> "1" GestorPuntuacion
+InterfazUsuario "1" --> "1" GestorTiempo
+GestorImagen -->"1"Entidad
+GestorImagen -->"1"ObjetoJuego
+GestorImagen -->"1"GestorTiles
+GestorTiles -->"*" Tile
+PanelJuego "1" --> "1" ManejadorTeclas
+PanelJuego "1" --> "1" Jugador
+PanelJuego "1" --> "*" ObjetoJuego
+Entidad <|-- Jugador
+Entidad <|-- Enemigo
+Enemigo <|-- EnemigoBasico
+Enemigo <|-- EnemigoMediano
+Enemigo <|-- EnemigoFinal
+ObjetoJuego <|-- ObjetoBanana
+ObjetoJuego <|-- ObjetoCorazon
+ObjetoJuego <|-- ObjetoHielo
+ObjetoJuego <|-- ObjetoUva
+PanelJuego "1" --> "1" GestorTiles
+PanelJuego "1" --> "1" GestorEventos
+PanelJuego "1" --> "1" InterfazUsuario
+GestorEventos "1" --> "*" Evento
+PanelJuego "1" --> "1" CargarGuardar
+CargarGuardar "1" --> "1" GrabadorDatos
+
+@enduml
